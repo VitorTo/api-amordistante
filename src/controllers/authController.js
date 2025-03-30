@@ -31,9 +31,8 @@ const register = async (req, res, next) => {
       });
     }
     
-    await authService.register(userData);
-    // Retorna apenas status 201 sem informações do usuário
-    res.status(201).json({ message: 'User registered successfully' });
+    const result = await authService.register(userData);
+    res.status(201).json(result);
   } catch (error) {
     if (error.message === 'Email already in use') {
       return res.status(400).json({ message: error.message });
@@ -42,7 +41,71 @@ const register = async (req, res, next) => {
   }
 };
 
+const joinWithInvite = async (req, res, next) => {
+  try {
+    const { inviteCode } = req.params;
+    const userData = req.body;
+    
+    // Verifica o convite antes de prosseguir
+    await authService.verifyInvite(inviteCode);
+    
+    // Validate required fields
+    if (!userData.email || !userData.password || !userData.name) {
+      return res.status(400).json({ 
+        message: 'params invalid' 
+      });
+    }
+    
+    await authService.joinWithInvite(inviteCode, userData);
+    res.status(201).json({ message: 'Joined successfully' });
+  } catch (error) {
+    const errorMessages = [
+      'Invalid invite code', 
+      'Invite already used', 
+      'Invite expired',
+      'Email already in use',
+      'Profile not found'
+    ];
+    
+    if (errorMessages.includes(error.message)) {
+      return res.status(400).json({ message: error.message });
+    }
+    
+    next(error);
+  }
+};
+
+// Rota para verificar um código de convite antes do registro
+const verifyInvite = async (req, res, next) => {
+  try {
+    const { inviteCode } = req.params;
+    
+    // Verifica se o código foi fornecido
+    if (!inviteCode) {
+      return res.status(400).json({ 
+        valid: false, 
+        message: 'Invite code is required' 
+      });
+    }
+    
+    const inviteDetails = await authService.verifyInvite(inviteCode);
+    
+    res.json({ 
+      valid: true, 
+      invite: inviteDetails 
+    });
+    
+  } catch (error) {
+    res.status(400).json({ 
+      valid: false, 
+      message: error.message 
+    });
+  }
+};
+
 module.exports = {
   login,
-  register
+  register,
+  joinWithInvite,
+  verifyInvite
 }; 
