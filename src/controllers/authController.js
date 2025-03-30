@@ -45,9 +45,10 @@ const joinWithInvite = async (req, res, next) => {
   try {
     const { inviteCode } = req.params;
     const userData = req.body;
-    // TODO IMPLEMENTAR VERIFICAÇÃO
-    // const invite = await authService.verifyInvite(inviteCode);
-
+    
+    // Verifica o convite antes de prosseguir
+    await authService.verifyInvite(inviteCode);
+    
     // Validate required fields
     if (!userData.email || !userData.password || !userData.name) {
       return res.status(400).json({ 
@@ -62,7 +63,8 @@ const joinWithInvite = async (req, res, next) => {
       'Invalid invite code', 
       'Invite already used', 
       'Invite expired',
-      'Email already in use'
+      'Email already in use',
+      'Profile not found'
     ];
     
     if (errorMessages.includes(error.message)) {
@@ -78,10 +80,26 @@ const verifyInvite = async (req, res, next) => {
   try {
     const { inviteCode } = req.params;
     
-    const invite = await authService.verifyInvite(inviteCode);
-    res.json({ valid: true, invite });
+    // Verifica se o código foi fornecido
+    if (!inviteCode) {
+      return res.status(400).json({ 
+        valid: false, 
+        message: 'Invite code is required' 
+      });
+    }
+    
+    const inviteDetails = await authService.verifyInvite(inviteCode);
+    
+    res.json({ 
+      valid: true, 
+      invite: inviteDetails 
+    });
+    
   } catch (error) {
-    res.status(400).json({ valid: false, message: error.message });
+    res.status(400).json({ 
+      valid: false, 
+      message: error.message 
+    });
   }
 };
 

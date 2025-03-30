@@ -133,8 +133,46 @@ const joinWithInvite = async (inviteCode, userData) => {
   return { success: true };
 };
 
+// Função para verificar convite
+const verifyInvite = async (inviteCode) => {
+  // Busca o convite pelo código
+  const invite = await inviteRepository.findByCode(inviteCode);
+  
+  if (!invite) {
+    throw new Error('Invalid invite code');
+  }
+  
+  if (invite.isUsed) {
+    throw new Error('Invite already used');
+  }
+  
+  if (invite.expiresAt < new Date()) {
+    throw new Error('Invite expired');
+  }
+  
+  // Busca informações do perfil e do criador para exibir ao convidado
+  const profile = await profileRepository.findById(invite.profileId);
+  
+  if (!profile) {
+    throw new Error('Profile not found');
+  }
+  
+  // Busca informações básicas do usuário que criou o convite
+  const creator = await userRepository.findById(invite.createdBy);
+  
+  // Retorna apenas informações seguras para o frontend
+  return {
+    inviteCode: invite.code,
+    expiresAt: invite.expiresAt,
+    createdAt: invite.createdAt,
+    profileName: profile.name,
+    invitedBy: creator ? creator.name : 'Unknown user'
+  };
+};
+
 module.exports = {
   login,
   register,
-  joinWithInvite
+  joinWithInvite,
+  verifyInvite
 }; 

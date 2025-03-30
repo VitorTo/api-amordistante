@@ -9,7 +9,9 @@ const i18n = {
       'Invalid invite code': 'Invalid invite code',
       'Invite already used': 'This invite has already been used',
       'Invite expired': 'This invite has expired',
-      'Joined successfully': 'You have joined the relationship successfully'
+      'Joined successfully': 'You have joined the relationship successfully',
+      'Invite code is required': 'Invite code is required',
+      'Profile not found': 'Profile not found'
     },
     'pt-BR': {
       'Invalid credentials': 'Credenciais inválidas',
@@ -20,7 +22,9 @@ const i18n = {
       'Invalid invite code': 'Código de convite inválido',
       'Invite already used': 'Este convite já foi utilizado',
       'Invite expired': 'Este convite expirou',
-      'Joined successfully': 'Você entrou no relacionamento com sucesso'
+      'Joined successfully': 'Você entrou no relacionamento com sucesso',
+      'Invite code is required': 'O código de convite é obrigatório',
+      'Profile not found': 'Perfil não encontrado'
     }
   },
   
