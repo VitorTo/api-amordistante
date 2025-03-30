@@ -1,13 +1,28 @@
 const userRepository = require('../repositories/userRepository');
 const crypto = require('crypto');
+const jwt = require('jsonwebtoken');
 
 // Hash simples de senha - na produção, use BCRYPT ou ARGON2
 const hashPassword = (password) => {
   return crypto.createHash('sha256').update(password).digest('hex');
 };
 
+// Função para gerar token JWT
+const generateToken = (user) => {
+  const payload = {
+    userId: user._id,
+    email: user.email
+  };
+  
+  return jwt.sign(
+    payload, 
+    process.env.JWT_SECRET, 
+    { expiresIn: '5h' } // Token expira em 5 horas
+  );
+};
+
 const login = async (email, password) => {
-  // Encontre usuário por e -mail
+  // Encontre usuário por e-mail
   const user = await userRepository.findByEmail(email);
   
   if (!user) {
@@ -20,13 +35,16 @@ const login = async (email, password) => {
     throw new Error('Invalid credentials');
   }
   
-  // Retorne informações do usuário sem senha
-  const { password: _, ...userWithoutPassword } = user;
+  // Gerar token JWT
+  const token = generateToken(user);
   
-  // Em uma implementação real, você geraria e retornaria um token JWT aqui
+  // Retorne apenas informações mínimas do usuário
   return {
-    user: userWithoutPassword,
-    // token: generateToken(user)
+    user: {
+      email: user.email,
+      name: user.name
+    },
+    token
   };
 };
 
@@ -42,16 +60,14 @@ const register = async (userData) => {
   const hashedPassword = hashPassword(userData.password);
   
   // Crie novo usuário
-  const newUser = await userRepository.create({
+  await userRepository.create({
     ...userData,
     password: hashedPassword,
     createdAt: new Date()
   });
   
-  // Remova a senha da resposta
-  const { password: _, ...userWithoutPassword } = newUser;
-  
-  return userWithoutPassword;
+  // Não retorna dados do usuário após o registro
+  return { success: true };
 };
 
 module.exports = {

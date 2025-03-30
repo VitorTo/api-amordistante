@@ -31,8 +31,9 @@ const register = async (req, res, next) => {
       });
     }
     
-    const newUser = await authService.register(userData);
-    res.status(201).json(newUser);
+    await authService.register(userData);
+    // Retorna apenas status 201 sem informações do usuário
+    res.status(201).json({ message: 'User registered successfully' });
   } catch (error) {
     if (error.message === 'Email already in use') {
       return res.status(400).json({ message: error.message });

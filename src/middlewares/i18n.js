@@ -4,13 +4,15 @@ const i18n = {
       'Invalid credentials': 'Invalid credentials',
       'Email already in use': 'Email already in use',
       'Email and password are required': 'Email and password are required',
-      'Name, email and password are required': 'Name, email and password are required'
+      'params invalid': 'Name, email and password are required',
+      'User registered successfully': 'User registered successfully'
     },
     'pt-BR': {
       'Invalid credentials': 'Credenciais inválidas',
       'Email already in use': 'Email já está em uso',
       'Email and password are required': 'Email e senha são obrigatórios',
-      'Name, email and password are required': 'Nome, email e senha são obrigatórios'
+      'params invalid': 'Nome, email e senha são obrigatórios',
+      'User registered successfully': 'Usuário registrado com sucesso'
     }
   },
   
