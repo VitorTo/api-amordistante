@@ -1,4 +1,6 @@
 const userRepository = require('../repositories/userRepository');
+const profileRepository = require('../repositories/profileRepository');
+const inviteRepository = require('../repositories/inviteRepository');
 const crypto = require('crypto');
 const jwt = require('jsonwebtoken');
 
@@ -49,28 +51,90 @@ const login = async (email, password) => {
 };
 
 const register = async (userData) => {
-  // Check if user already exists
+  // Verifica se o e-mail já está em uso
   const existingUser = await userRepository.findByEmail(userData.email);
   
   if (existingUser) {
     throw new Error('Email already in use');
   }
   
-  // Senha de hash
+  // Hash da senha
   const hashedPassword = hashPassword(userData.password);
   
-  // Crie novo usuário
-  await userRepository.create({
+  // Cria novo usuário
+  const newUser = await userRepository.create({
     ...userData,
     password: hashedPassword,
     createdAt: new Date()
   });
   
-  // Não retorna dados do usuário após o registro
+  // Cria um novo perfil compartilhado
+  const profile = await profileRepository.create({
+    name: `${userData.name}'s Relationship`,
+    createdBy: newUser.id
+  });
+  
+  // Adiciona o usuário como membro do perfil
+  await profileRepository.addMember(profile.id, newUser.id);
+  
+  // Gera um convite para o parceiro
+  const invite = await inviteRepository.create(profile.id, newUser.id);
+  
+  // Gera a URL de convite que será compartilhada
+  const inviteUrl = `${process.env.API_BASE_URL || 'http://localhost:3000'}/api/auth/join/${invite.code}`;
+  
+  return { 
+    success: true,
+    inviteCode: invite.code,
+    inviteUrl
+  };
+};
+
+// Nova função para registrar o segundo membro através do convite
+const joinWithInvite = async (inviteCode, userData) => {
+  // Busca o convite pelo código
+  const invite = await inviteRepository.findByCode(inviteCode);
+  
+  if (!invite) {
+    throw new Error('Invalid invite code');
+  }
+  
+  if (invite.isUsed) {
+    throw new Error('Invite already used');
+  }
+  
+  if (invite.expiresAt < new Date()) {
+    throw new Error('Invite expired');
+  }
+  
+  // Verifica se o e-mail já está em uso
+  const existingUser = await userRepository.findByEmail(userData.email);
+  
+  if (existingUser) {
+    throw new Error('Email already in use');
+  }
+  
+  // Hash da senha
+  const hashedPassword = hashPassword(userData.password);
+  
+  // Cria novo usuário
+  const newUser = await userRepository.create({
+    ...userData,
+    password: hashedPassword,
+    createdAt: new Date()
+  });
+  
+  // Adiciona o novo usuário ao perfil associado ao convite
+  await profileRepository.addMember(invite.profileId, newUser.id);
+  
+  // Marca o convite como usado
+  await inviteRepository.markAsUsed(invite._id);
+  
   return { success: true };
 };
 
 module.exports = {
   login,
-  register
+  register,
+  joinWithInvite
 }; 
