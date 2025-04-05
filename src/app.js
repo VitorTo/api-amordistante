@@ -1,5 +1,6 @@
 const express = require('express');
 const cors = require('cors');
+const cookieParser = require('cookie-parser');
 const { dbConnection } = require('./config/database');
 const i18nMiddleware = require('./middlewares/i18n');
 
@@ -18,9 +19,13 @@ dbConnection().then(() => {
 });
 
 // Middlewares
-app.use(cors());
+app.use(cors({
+  origin: process.env.CLIENT_URL, // Defina a URL do cliente
+  credentials: true // Permite o envio de cookies
+}));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(cookieParser()); // Adiciona o middleware para cookies
 app.use(i18nMiddleware); // Add i18n middleware
 
 // Routes

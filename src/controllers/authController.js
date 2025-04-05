@@ -11,7 +11,20 @@ const login = async (req, res, next) => {
     }
     
     const result = await authService.login(email, password);
-    res.json(result);
+    
+    // Configurações do cookie
+    const cookieOptions = {
+      httpOnly: true, // O cookie não pode ser acessado via JavaScript no navegador
+      secure: process.env.NODE_ENV === 'production', // Envia apenas em HTTPS no ambiente de produção
+      maxAge: 5 * 60 * 60 * 1000, // 5 horas em milissegundos
+      sameSite: 'Strict' // Protege contra CSRF
+    };
+    
+    // Envia o token como um cookie
+    res.cookie('jwt', result.token, cookieOptions);
+    
+    // Retorna apenas as informações do usuário
+    res.json({ user: result.user });
   } catch (error) {
     if (error.message === 'Invalid credentials') {
       return res.status(401).json({ message: error.message });
