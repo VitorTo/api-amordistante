@@ -1,16 +1,10 @@
 const profileService = require('../services/profileService');
-const multer = require('multer');
-const upload = multer();
 
 const createProfile = async (req, res, next) => {
   try {
     const profileData = req.body;
-    const files = {
-      avatar: req.files?.avatar?.[0],
-      coverImage: req.files?.coverImage?.[0]
-    };
     
-    const profile = await profileService.createProfile(profileData, files);
+    const profile = await profileService.createProfile(profileData);
     res.status(201).json(profile);
   } catch (error) {
     next(error);
@@ -21,12 +15,8 @@ const updateProfile = async (req, res, next) => {
   try {
     const { profileId } = req.params;
     const updateData = req.body;
-    const files = {
-      avatar: req.files?.avatar?.[0],
-      coverImage: req.files?.coverImage?.[0]
-    };
     
-    const profile = await profileService.updateProfile(profileId, updateData, files);
+    const profile = await profileService.updateProfile(profileId, updateData);
     res.json(profile);
   } catch (error) {
     if (error.message.includes('Profile not found')) {
@@ -51,7 +41,7 @@ const getProfile = async (req, res, next) => {
 
 const getMyProfile = async (req, res, next) => {
   try {
-    const userId = req.user.userId; // Assumindo que temos o middleware de auth
+    const userId = req.user.id;
     const profile = await profileService.getProfileByMember(userId);
     res.json(profile);
   } catch (error) {

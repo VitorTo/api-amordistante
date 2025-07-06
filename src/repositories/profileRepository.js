@@ -8,11 +8,11 @@ const create = async (profileData) => {
   const profile = {
     ...profileData,
     createdAt: new Date(),
-    members: [], // IDs dos usuários
+    members: [], // usersId
     isComplete: false,
     milestoneDate: null,
-    avatar: null,
-    coverImage: null,
+    avatar: null, // front default
+    coverImage: null, // front default
     updatedAt: new Date()
   };
   

@@ -3,6 +3,7 @@ const profileRepository = require('../repositories/profileRepository');
 const inviteRepository = require('../repositories/inviteRepository');
 const crypto = require('crypto');
 const jwt = require('jsonwebtoken');
+const { md5 }  = require('../utils/generics');
 
 // Hash simples de senha - na produção, use BCRYPT ou ARGON2
 const hashPassword = (password) => {
@@ -38,15 +39,16 @@ const login = async (email, password) => {
   }
   
   // Gerar token JWT
-  const token = generateToken(user);
+  // const token = generateToken(user);
   
   // Retorne apenas informações mínimas do usuário
   return {
     user: {
       email: user.email,
-      name: user.name
-    },
-    token
+      name: user.name,
+      role: user.role || "common",
+      id: md5(user.email),
+    }
   };
 };
 

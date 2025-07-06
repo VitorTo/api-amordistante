@@ -1,23 +1,10 @@
 const profileRepository = require('../repositories/profileRepository');
-const { uploadImage } = require('../utils/imageUpload'); // Vamos criar este utilitário
 
-const createProfile = async (profileData, files) => {
+const createProfile = async (profileData) => {
   try {
-    // Upload das imagens se fornecidas
-    let imageUrls = {};
-    
-    if (files?.avatar) {
-      imageUrls.avatar = await uploadImage(files.avatar, 'avatars');
-    }
-    
-    if (files?.coverImage) {
-      imageUrls.coverImage = await uploadImage(files.coverImage, 'covers');
-    }
-    
     // Criar perfil com as URLs das imagens
     const profile = await profileRepository.create({
-      ...profileData,
-      ...imageUrls
+      ...profileData
     });
     
     return profile;
@@ -26,21 +13,10 @@ const createProfile = async (profileData, files) => {
   }
 };
 
-const updateProfile = async (profileId, updateData, files) => {
-  try {
-    let imageUrls = {};
-    
-    if (files?.avatar) {
-      imageUrls.avatar = await uploadImage(files.avatar, 'avatars');
-    }
-    
-    if (files?.coverImage) {
-      imageUrls.coverImage = await uploadImage(files.coverImage, 'covers');
-    }
-    
+const updateProfile = async (profileId, updateData) => {
+  try {    
     const updatedProfile = await profileRepository.update(profileId, {
-      ...updateData,
-      ...imageUrls
+      ...updateData
     });
     
     return updatedProfile;

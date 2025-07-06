@@ -2,12 +2,9 @@ const express = require('express');
 const cors = require('cors');
 const cookieParser = require('cookie-parser');
 const { dbConnection } = require('./config/database');
-const i18nMiddleware = require('./middlewares/i18n');
+// const i18nMiddleware = require('./middlewares/i18n');
 
-// Import routes
 const routes = require('./routes');
-
-// Initialize Express
 const app = express();
 
 // Connect to MongoDB
@@ -20,13 +17,14 @@ dbConnection().then(() => {
 
 // Middlewares
 app.use(cors({
-  origin: process.env.CLIENT_URL, // Defina a URL do cliente
-  credentials: true // Permite o envio de cookies
+  origin: "*",// process.env.CLIENT_ORIGIN,
+  credentials: true,
 }));
 app.use(express.json());
+app.use(cookieParser());
+app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(cookieParser()); // Adiciona o middleware para cookies
-app.use(i18nMiddleware); // Add i18n middleware
+// app.use(i18nMiddleware); // TODO: Review i18n middleware
 
 // Routes
 app.use('/api', routes);
